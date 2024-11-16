@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from keras.models import load_model
+import tensorflow as tf
 from statistics import mode
 from utils.datasets import get_labels
 from utils.inference import detect_faces
@@ -10,7 +10,7 @@ from utils.inference import apply_offsets
 from utils.inference import load_detection_model
 from utils.preprocessor import preprocess_input
 
-USE_WEBCAM = True # If false, loads video file source
+USE_WEBCAM = True  # If false, loads video file source
 
 # parameters for loading data and images
 emotion_model_path = './models/emotion_model.hdf5'
@@ -21,8 +21,9 @@ frame_window = 10
 emotion_offsets = (20, 40)
 
 # loading models
-face_cascade = cv2.CascadeClassifier('./models/haarcascade_frontalface_default.xml')
-emotion_classifier = load_model(emotion_model_path)
+face_cascade = cv2.CascadeClassifier(
+    './models/haarcascade_frontalface_default.xml')
+emotion_classifier = tf.keras.models.load_model(emotion_model_path)
 
 # getting input model shapes for inference
 emotion_target_size = emotion_classifier.input_shape[1:3]
@@ -38,20 +39,20 @@ video_capture = cv2.VideoCapture(0)
 # Select video or webcam feed
 cap = None
 if (USE_WEBCAM == True):
-    cap = cv2.VideoCapture(0) # Webcam source
+    cap = cv2.VideoCapture(0)  # Webcam source
 else:
-    cap = cv2.VideoCapture('./demo/dinner.mp4') # Video file source
+    cap = cv2.VideoCapture('./demo/dinner.mp4')  # Video file source
 
-while cap.isOpened(): # True:
+while cap.isOpened():  # True:
     ret, bgr_image = cap.read()
 
-    #bgr_image = video_capture.read()[1]
+    # bgr_image = video_capture.read()[1]
 
     gray_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2GRAY)
     rgb_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
 
     faces = face_cascade.detectMultiScale(gray_image, scaleFactor=1.1, minNeighbors=5,
-			minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE)
+                                          minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE)
 
     for face_coordinates in faces:
 
